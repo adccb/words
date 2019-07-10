@@ -1,70 +1,54 @@
-const inquirer = require('inquirer')
-const chalk = require('chalk')
+const { prompt } = require('inquirer')
+const { red, cyan, green } = require('chalk')
 
-const levels = {
-  fearful: {
-    positivity: 'negative',
-    adjectives: ['scared', 'anxious', 'insecure', 'weak', 'rejected', 'threatened']
-  },
-  angry: {
-    positivity: 'negative', 
-    adjectives: ['let down', 'humiliated', 'bitter', 'mad', 'aggressive', 'frustrated', 'distant', 'critical']
-  },
-  disgusted: {
-    positivity: 'negative', 
-    adjectives: ['disapproving', 'disappointed', 'awful', 'repelled']
-  },
-  sad: {
-    positivity: 'negative',
-    adjectives: ['hurt', 'depressed', 'guilty', 'despairing', 'vulnerable', 'lonely']
-  },
-  happy: {
-    positivity: 'positive',
-    adjectives: ['optimistic', 'trusting', 'peaceful', 'powerful', 'accepted', 'proud', 'interested', 'content', 'playful']
-  },
-  surprised: {
-    positivity: 'neutral',
-    adjectives: ['startled', 'confused', 'amazed', 'excited']
-  }
-}
+const { words, c_pos, c_neu, c_neg } = require('./words.js')
+
+Array.prototype.random = function() { return this[Math.floor(Math.random() * this.length)] }
 
 const positivity = {
-  positive: {
-    color: chalk.green,
+  [c_pos]: {
+    color: green,
     emoji: ['☺️', '👏', '✨', '🌺', '🎉']
   },
-  neutral: {
-    color: chalk.cyan,
+  [c_neu]: {
+    color: cyan,
     emoji: ['🙂', '👋', '🐙', '🌿', '🌚']
   },
-  negative: {
-    color: chalk.red,
+  [c_neg]: {
+    color: red,
     emoji: ['😱', '🤟', '❤️', '☀️', '🌹']
   }
 }
 
-inquirer.prompt([
-  {
-    type: 'list',
-    name: 'mood',
-    message: 'what word best describes your mood?',
-    choices: Object.keys(levels),
-    filter: mood => mood.toLowerCase()
-  }
-]).then(({ mood }) => {
-  const { color, emoji } = positivity[levels[mood].positivity]
-  const random = arr => arr[Math.floor(Math.random() * arr.length)]
-
-  inquirer.prompt([
+;(async function () {
+  const { t1 } = await prompt([
     {
       type: 'list',
-      name: 'word',
-      message: 'is one of these a better fit?',
-      choices: levels[mood].adjectives,
-    } 
-  ]).then(({ word }) => {
-    console.log()
-    console.log(`you chose ${color(word)}. glad we could help. ${random(emoji)}`)
-  })
-})
+      name: 't1',
+      message: 'what word best describes your mood?',
+      choices: Object.keys(words),
+    }
+  ])
+    
+  const { color, emoji } = positivity[words[t1].positivity]
 
+  const { t2 } = await prompt([
+    {
+      type: 'list',
+      name: 't2',
+      message: 'is one of these a better fit?',
+      choices: Object.keys(words[t1].adjectives),
+    } 
+  ])
+
+  const { t3 } = await prompt([
+    {
+      type: 'list',
+      name: 't3',
+      message: 'how about one of these?',
+      choices: words[t1].adjectives[t2]
+    }  
+  ])
+
+  console.log(`\nyou chose ${color(t3)}. glad we could help. ${emoji.random()}`)
+})()
